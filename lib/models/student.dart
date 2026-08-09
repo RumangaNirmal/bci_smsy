@@ -1,15 +1,11 @@
 class Student {
+  int id;
+  String name;
+  String email;
+
   Student({
     required this.id,
-    required this.regNo,
     required this.name,
-    required this.major,
-    List<String>? enrolledCourseIds,
-  }) : enrolledCourseIds = enrolledCourseIds ?? [];
-
-  final String id;
-  String regNo;
-  String name;
-  String major;
-  List<String> enrolledCourseIds;
+    required this.email,
+  });
 }

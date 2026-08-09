@@ -1,15 +1,11 @@
 class Course {
+  int id;
+  String title;
+  String code;
+
   Course({
     required this.id,
-    required this.code,
     required this.title,
-    required this.description,
-    required this.credits,
+    required this.code,
   });
-
-  final String id;
-  String code;
-  String title;
-  String description;
-  double credits;
 }

@@ -1,243 +1,303 @@
 import 'package:flutter/material.dart';
-import '../services/database_service.dart';
 import 'students/student_list_screen.dart';
 import 'courses/course_list_screen.dart';
 import 'enrollments/enrollment_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F6FB),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E3A8A),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 16,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 72,
+                      width: 72,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(22),
+                        child: Image.asset(
+                          'assets/logo.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                              child: Text(
+                                'BCI',
+                                style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E3A8A),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'BCI Campus',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'More Than Just Education',
+                            style: TextStyle(
+                              color: Color(0xFFCBD5E1),
+                              fontSize: 14,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Academic Excellence System',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _HomeCard(
+                              icon: Icons.person_outline,
+                              title: 'Students Directory',
+                              subtitle: 'Manage student records',
+                              color: const Color(0xFF2563EB),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const StudentListScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _HomeCard(
+                              icon: Icons.menu_book_outlined,
+                              title: 'Course Catalog',
+                              subtitle: 'Manage course entries',
+                              color: const Color(0xFF047857),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const CourseListScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _HomeCard(
+                        icon: Icons.how_to_reg_outlined,
+                        title: 'Enrollment Management',
+                        subtitle: 'Assign courses to students',
+                        color: const Color(0xFFF59E0B),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const EnrollmentScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Quick Actions',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            _FeatureRow(label: 'Add new student records'),
+                            SizedBox(height: 12),
+                            _FeatureRow(label: 'Track course enrollments'),
+                            SizedBox(height: 12),
+                            _FeatureRow(label: 'Review student and course details'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final _db = DatabaseService.instance;
+class _HomeCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
 
-  @override
-  void initState() {
-    super.initState();
-    _db.addListener(_refresh);
-  }
-
-  @override
-  void dispose() {
-    _db.removeListener(_refresh);
-    super.dispose();
-  }
-
-  void _refresh() => setState(() {});
+  const _HomeCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(title: const Text('BCI Campus')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 14,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
           children: [
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
+              height: 52,
+              width: 52,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
-                borderRadius: BorderRadius.circular(16),
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(18),
               ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Dashboard Overview',
-                      style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Manage your campus ecosystem with precision. Monitor student growth, '
-                    'course availability, and academic excellence at a glance.',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFCBA72F),
-                      foregroundColor: const Color(0xFF4E3D00),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                     ),
-                    onPressed: () => _goToEnrollment(context),
-                    icon: const Icon(Icons.add),
-                    label: const Text('New Enrollment'),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: _StatCard(
-                      label: 'Total Students',
-                      value: '${_db.students.length}',
-                      icon: Icons.group_outlined),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _StatCard(
-                      label: 'Total Courses',
-                      value: '${_db.courses.length}',
-                      icon: Icons.school_outlined),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _StatCard(
-              label: 'Active Enrollments',
-              value: '${_db.totalActiveEnrollments}',
-              icon: Icons.assignment_turned_in_outlined,
-              wide: true,
-            ),
-            const SizedBox(height: 24),
-            Text('Quick Actions',
-                style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary)),
-            const SizedBox(height: 12),
-            _QuickAction(
-              icon: Icons.person_add_outlined,
-              label: 'Add Student',
-              onTap: () => Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => const StudentListScreen())),
-            ),
-            _QuickAction(
-              icon: Icons.library_add_outlined,
-              label: 'Add Course',
-              onTap: () =>
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const CourseListScreen())),
-            ),
-            _QuickAction(
-              icon: Icons.post_add_outlined,
-              label: 'New Enrollment',
-              onTap: () => _goToEnrollment(context),
-            ),
+            const Icon(Icons.chevron_right, color: Colors.grey),
           ],
         ),
       ),
-      bottomNavigationBar: BciBottomNav(
-        currentIndex: 0,
-        onTap: (index) => handleBciNavTap(context, index),
-      ),
     );
-  }
-
-  void _goToEnrollment(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const EnrollmentScreen()));
   }
 }
 
-class _StatCard extends StatelessWidget {
-  const _StatCard({required this.label, required this.value, required this.icon, this.wide = false});
-
+class _FeatureRow extends StatelessWidget {
   final String label;
-  final String value;
-  final IconData icon;
-  final bool wide;
+
+  const _FeatureRow({required this.label});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      width: wide ? double.infinity : null,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE4E2E2)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label.toUpperCase(),
-                  style: TextStyle(fontSize: 11, color: Colors.grey[600], letterSpacing: 0.5)),
-              const SizedBox(height: 4),
-              Text(value,
-                  style: TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
-            ],
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 10,
+          width: 10,
+          decoration: BoxDecoration(
+            color: const Color(0xFF2563EB),
+            borderRadius: BorderRadius.circular(4),
           ),
-          CircleAvatar(
-            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-            child: Icon(icon, color: theme.colorScheme.primary),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 14, height: 1.5),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({required this.icon, required this.label, required this.onTap});
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        leading: Icon(icon, color: theme.colorScheme.primary),
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
-      ),
-    );
-  }
-}
-
-/// Shared bottom navigation bar used by every top-level screen so behaviour
-/// stays consistent (Home / Students / Courses / Enroll).
-class BciBottomNav extends StatelessWidget {
-  const BciBottomNav({super.key, required this.currentIndex, required this.onTap});
-
-  final int currentIndex;
-  final ValueChanged<int> onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Theme.of(context).colorScheme.primary,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.group_outlined), label: 'Students'),
-        BottomNavigationBarItem(icon: Icon(Icons.school_outlined), label: 'Courses'),
-        BottomNavigationBarItem(icon: Icon(Icons.assignment_turned_in_outlined), label: 'Enroll'),
+        ),
       ],
     );
   }
-}
-
-/// Handles bottom-nav taps from any top-level screen by replacing the current route.
-void handleBciNavTap(BuildContext context, int index) {
-  Widget page;
-  switch (index) {
-    case 0:
-      page = const HomeScreen();
-      break;
-    case 1:
-      page = const StudentListScreen();
-      break;
-    case 2:
-      page = const CourseListScreen();
-      break;
-    case 3:
-      page = const EnrollmentScreen();
-      break;
-    default:
-      return;
-  }
-  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => page));
 }

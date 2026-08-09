@@ -10,63 +10,47 @@ class AddStudentScreen extends StatefulWidget {
 }
 
 class _AddStudentScreenState extends State<AddStudentScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _regNoController = TextEditingController();
-  final _nameController = TextEditingController();
-  final _majorController = TextEditingController();
-  final _db = DatabaseService.instance;
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
 
-  @override
-  void dispose() {
-    _regNoController.dispose();
-    _nameController.dispose();
-    _majorController.dispose();
-    super.dispose();
-  }
+  void saveStudent() {
+    DatabaseService.students.add(
+      Student(
+        id: DateTime.now().millisecondsSinceEpoch,
+        name: nameController.text,
+        email: emailController.text,
+      ),
+    );
 
-  void _save() {
-    if (!_formKey.currentState!.validate()) return;
-    _db.addStudent(Student(
-      id: _db.newStudentId(),
-      regNo: _regNoController.text.trim(),
-      name: _nameController.text.trim(),
-      major: _majorController.text.trim(),
-    ));
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Student')),
+      appBar: AppBar(title: const Text("Add Student")),
       body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _regNoController,
-                decoration: const InputDecoration(labelText: 'Registration No.'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: "Name",
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Full Name'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+            ),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: "Email",
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _majorController,
-                decoration: const InputDecoration(labelText: 'Major / Programme'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(onPressed: _save, child: const Text('Save Student')),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: saveStudent,
+              child: const Text("Save"),
+            )
+          ],
         ),
       ),
     );
