@@ -1,17 +1,90 @@
-# bci_smsy
+# BCI Integrated Management System - Flutter MVP
 
-A new Flutter project.
+This starter application contains two working modules:
 
-## Getting Started
+1. Student Management
+2. Employee and Payroll Management
 
-This project is a starting point for a Flutter application.
+It uses only the Flutter SDK, so there are no third-party package dependencies.
+Data is currently stored in memory for demonstration and teaching. Closing the
+application clears newly entered records. The next production step is to connect
+this UI to a Spring Boot REST API and PostgreSQL database.
 
-A few resources to get you started if this is your first Flutter project:
+## Features
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Responsive dashboard for mobile and desktop/web widths
+- Student search, registration and deletion
+- Employee registration and removal
+- Gross salary, deductions and net salary calculation
+- Sample data for classroom demonstrations
+- Form validation
+- Material 3 interface
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Project setup on macOS
+
+### Option A: Create platform folders inside this project
+
+1. Extract the ZIP file.
+2. Open Terminal in the extracted folder.
+3. Run:
+
+```bash
+flutter create --project-name bci_management_system .
+flutter pub get
+flutter run
+```
+
+`flutter create --project-name bci_management_system .` generates the Android, iOS, web and desktop folders while
+keeping the supplied `lib` source code.
+
+### Option B: Create a new Flutter project
+
+```bash
+flutter create bci_management_system
+cd bci_management_system
+```
+
+Replace its `lib` folder and `pubspec.yaml` with the files from this starter.
+Then run:
+
+```bash
+flutter pub get
+flutter run
+```
+
+## Run targets
+
+List devices:
+
+```bash
+flutter devices
+```
+
+Run Android emulator or phone:
+
+```bash
+flutter run
+```
+
+Run in Chrome:
+
+```bash
+flutter run -d chrome
+```
+
+## Payroll formula
+
+- Gross Salary = Basic Salary + Allowances + Overtime
+- Total Deductions = Other Deductions + Tax
+- Net Salary = Gross Salary - Total Deductions
+
+## Recommended production improvements
+
+- Spring Boot REST API
+- PostgreSQL database
+- JWT authentication and role permissions
+- Student attendance, results and fees
+- Employee attendance and leave
+- Monthly payroll periods and approval workflow
+- PDF payslip generation
+- Audit logs and database backups

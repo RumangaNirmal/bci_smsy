@@ -1,6 +1,6 @@
 {
-    "name": "bci_smsy",
-    "short_name": "bci_smsy",
+    "name": "bci_management_system",
+    "short_name": "bci_management_system",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
