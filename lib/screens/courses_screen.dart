@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../models/course.dart';
+import '../services/course_service.dart';
 import '../state/bci_store.dart';
+import '../widgets/solid_form_field.dart';
 
 class CoursesScreen extends StatefulWidget {
   const CoursesScreen({super.key, required this.store});
@@ -14,15 +16,18 @@ class CoursesScreen extends StatefulWidget {
 
 class _CoursesScreenState extends State<CoursesScreen> {
   String _query = '';
+  late final CourseServiceContract _courseService;
+
+  @override
+  void initState() {
+    super.initState();
+    _courseService = CourseService(store: widget.store);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final List<Course> courses = widget.store.courses.where((Course course) {
-      final String search = _query.toLowerCase();
-      return course.code.toLowerCase().contains(search) ||
-          course.name.toLowerCase().contains(search) ||
-          course.description.toLowerCase().contains(search);
-    }).toList();
+    // The screen delegates course filtering to a dedicated service for better separation of concerns.
+    final List<Course> courses = _courseService.searchCourses(_query);
 
     return Scaffold(
       body: Column(
@@ -127,7 +132,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
     );
 
     if (confirmed == true) {
-      widget.store.removeCourse(course.id);
+      _courseService.deleteCourse(course.id);
     }
   }
 
@@ -156,16 +161,25 @@ class _CoursesScreenState extends State<CoursesScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  _RequiredField(controller: idController, label: 'Course ID'),
-                  _RequiredField(controller: codeController, label: 'Course Code'),
-                  _RequiredField(controller: nameController, label: 'Course Name'),
-                  _RequiredField(
+                  SolidFormField(controller: idController, label: 'Course ID'),
+                  SolidFormField(controller: codeController, label: 'Course Code'),
+                  SolidFormField(controller: nameController, label: 'Course Name'),
+                  SolidFormField(
                     controller: creditsController,
                     label: 'Credits',
                     keyboardType: TextInputType.number,
+                    validator: (String? value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Credits is required.';
+                      }
+                      if (int.tryParse(value.trim()) == null) {
+                        return 'Enter a valid number.';
+                      }
+                      return null;
+                    },
                   ),
-                  _RequiredField(controller: descriptionController, label: 'Description'),
-                  _RequiredField(controller: statusController, label: 'Status'),
+                  SolidFormField(controller: descriptionController, label: 'Description'),
+                  SolidFormField(controller: statusController, label: 'Status'),
                 ],
               ),
             ),
@@ -187,10 +201,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
                   description: descriptionController.text.trim(),
                   status: statusController.text.trim().isEmpty ? 'Active' : statusController.text.trim(),
                 );
+                // The screen converts the entered values into a course object and passes them to the service layer.
                 if (course == null) {
-                  widget.store.addCourse(updatedCourse);
+                  _courseService.addCourse(updatedCourse);
                 } else {
-                  widget.store.updateCourse(
+                  _courseService.updateCourse(
                     updatedCourse,
                     originalId: course.id,
                   );
@@ -213,38 +228,3 @@ class _CoursesScreenState extends State<CoursesScreen> {
   }
 }
 
-class _RequiredField extends StatelessWidget {
-  const _RequiredField({
-    required this.controller,
-    required this.label,
-    this.keyboardType,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final TextInputType? keyboardType;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        validator: (String? value) {
-          if (value == null || value.trim().isEmpty) {
-            return '$label is required.';
-          }
-          if (label == 'Credits' && int.tryParse(value.trim()) == null) {
-            return 'Enter a valid number.';
-          }
-          return null;
-        },
-      ),
-    );
-  }
-}

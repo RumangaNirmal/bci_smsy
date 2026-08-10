@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/course.dart';
 import '../models/student.dart';
+import '../services/enrollment_service.dart';
 import '../state/bci_store.dart';
 
 class EnrolmentsScreen extends StatefulWidget {
@@ -15,10 +16,18 @@ class EnrolmentsScreen extends StatefulWidget {
 
 class _EnrolmentsScreenState extends State<EnrolmentsScreen> {
   String _query = '';
+  late final EnrollmentServiceContract _enrollmentService;
+
+  @override
+  void initState() {
+    super.initState();
+    _enrollmentService = EnrollmentService(store: widget.store);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final List<Student> students = widget.store.students.where((Student student) {
+    // The enrollment screen depends on a service abstraction for student and course operations.
+    final List<Student> students = _enrollmentService.getStudents().where((Student student) {
       final String search = _query.toLowerCase();
       return student.id.toLowerCase().contains(search) ||
           student.name.toLowerCase().contains(search) ||
@@ -61,7 +70,7 @@ class _EnrolmentsScreenState extends State<EnrolmentsScreen> {
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (BuildContext context, int index) {
                       final Student student = students[index];
-                      final List<Course> enrolledCourses = widget.store.getCoursesForStudent(student.id);
+                      final List<Course> enrolledCourses = _enrollmentService.getCoursesForStudent(student.id);
                       return Card(
                         child: ListTile(
                           title: Text(
@@ -98,7 +107,7 @@ class _EnrolmentsScreenState extends State<EnrolmentsScreen> {
 
   Future<void> _showEnrolDialog(Student student) async {
     final List<Course> availableCourses = widget.store.courses;
-    final Set<String> selectedCourseIds = widget.store.getCoursesForStudent(student.id).map((Course course) => course.id).toSet();
+    final Set<String> selectedCourseIds = _enrollmentService.getCoursesForStudent(student.id).map((Course course) => course.id).toSet();
 
     await showDialog<void>(
       context: context,
@@ -136,7 +145,7 @@ class _EnrolmentsScreenState extends State<EnrolmentsScreen> {
               ),
               FilledButton(
                 onPressed: () {
-                  widget.store.setCoursesForStudent(student.id, selectedCourseIds.toList());
+                  _enrollmentService.assignCourses(student.id, selectedCourseIds.toList());
                   Navigator.pop(dialogContext);
                 },
                 child: const Text('Save'),

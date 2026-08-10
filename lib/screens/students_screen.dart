@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../models/student.dart';
+import '../services/student_service.dart';
 import '../state/bci_store.dart';
+import '../widgets/solid_form_field.dart';
 
 class StudentsScreen extends StatefulWidget {
   const StudentsScreen({super.key, required this.store});
@@ -14,15 +16,18 @@ class StudentsScreen extends StatefulWidget {
 
 class _StudentsScreenState extends State<StudentsScreen> {
   String _query = '';
+  late final StudentServiceContract _studentService;
+
+  @override
+  void initState() {
+    super.initState();
+    _studentService = StudentService(store: widget.store);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final List<Student> students = widget.store.students.where((Student student) {
-      final String search = _query.toLowerCase();
-      return student.id.toLowerCase().contains(search) ||
-          student.name.toLowerCase().contains(search) ||
-          student.program.toLowerCase().contains(search);
-    }).toList();
+    // The screen delegates search and list handling to a service rather than keeping this logic inline.
+    final List<Student> students = _studentService.searchStudents(_query);
 
     return Scaffold(
       body: Column(
@@ -131,7 +136,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
     );
 
     if (confirmed == true) {
-      widget.store.removeStudent(student.id);
+      _studentService.deleteStudent(student.id);
     }
   }
 
@@ -155,18 +160,27 @@ class _StudentsScreenState extends State<StudentsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  _RequiredField(controller: idController, label: 'Student ID'),
-                  _RequiredField(controller: nameController, label: 'Full Name'),
-                  _RequiredField(
+                  SolidFormField(controller: idController, label: 'Student ID'),
+                  SolidFormField(controller: nameController, label: 'Full Name'),
+                  SolidFormField(
                     controller: emailController,
                     label: 'Email',
                     keyboardType: TextInputType.emailAddress,
+                    validator: (String? value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Email is required.';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Enter a valid email address.';
+                      }
+                      return null;
+                    },
                   ),
-                  _RequiredField(
+                  SolidFormField(
                     controller: programmeController,
                     label: 'Programme',
                   ),
-                  _RequiredField(controller: intakeController, label: 'Intake'),
+                  SolidFormField(controller: intakeController, label: 'Intake'),
                 ],
               ),
             ),
@@ -188,10 +202,11 @@ class _StudentsScreenState extends State<StudentsScreen> {
                   intake: intakeController.text.trim(),
                   status: 'Active',
                 );
+                // The screen collects the form input and forwards the action to the service layer.
                 if (student == null) {
-                  widget.store.addStudent(studentData);
+                  _studentService.addStudent(studentData);
                 } else {
-                  widget.store.updateStudent(
+                  _studentService.updateStudent(
                     studentData,
                     originalId: student.id,
                   );
@@ -213,38 +228,3 @@ class _StudentsScreenState extends State<StudentsScreen> {
   }
 }
 
-class _RequiredField extends StatelessWidget {
-  const _RequiredField({
-    required this.controller,
-    required this.label,
-    this.keyboardType,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final TextInputType? keyboardType;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        validator: (String? value) {
-          if (value == null || value.trim().isEmpty) {
-            return '$label is required.';
-          }
-          if (label == 'Email' && !value.contains('@')) {
-            return 'Enter a valid email address.';
-          }
-          return null;
-        },
-      ),
-    );
-  }
-}
