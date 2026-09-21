@@ -2,7 +2,7 @@ import '../models/course.dart';
 import '../models/student.dart';
 import '../state/bci_store.dart';
 
-/// This service handles enrollment logic separately from the user interface and application state.
+/// For enrollment logic to the main function.
 abstract class EnrollmentServiceContract {
   List<Student> getStudents();
   List<Course> getCoursesForStudent(String studentId);

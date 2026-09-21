@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../core/constants/app_strings.dart';
+import '../core/validators/validators.dart';
+import '../core/widgets/app_buttons.dart';
+import '../core/widgets/app_text_field.dart';
 import '../models/student.dart';
 import '../services/student_service.dart';
 import '../state/bci_store.dart';
@@ -26,7 +30,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // The screen delegates search and list handling to a service rather than keeping this logic inline.
+    // For search and list handling to the main function.
     final List<Student> students = _studentService.searchStudents(_query);
 
     return Scaffold(
@@ -38,19 +42,15 @@ class _StudentsScreenState extends State<StudentsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Student Management',
+                  AppStrings.studentManagement,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 14),
-                TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Search students',
-                    hintText: 'Search by ID, name or programme',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
-                  ),
+                SearchTextField(
+                  label: AppStrings.searchStudents,
+                  hintText: AppStrings.searchHintStudents,
                   onChanged: (String value) => setState(() => _query = value),
                 ),
               ],
@@ -58,7 +58,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
           ),
           Expanded(
             child: students.isEmpty
-                ? const Center(child: Text('No students found.'))
+                ? const Center(child: Text(AppStrings.noStudentsFound))
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
                     itemCount: students.length,
@@ -108,10 +108,10 @@ class _StudentsScreenState extends State<StudentsScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: PrimaryButton(
         onPressed: _showAddStudentDialog,
-        icon: const Icon(Icons.person_add_alt_1),
-        label: const Text('Add Student'),
+        icon: Icons.person_add_alt_1,
+        label: AppStrings.addStudent,
       ),
     );
   }
@@ -123,14 +123,8 @@ class _StudentsScreenState extends State<StudentsScreen> {
         title: const Text('Delete student'),
         content: Text('Delete ${student.name} from the system?'),
         actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
+          AppButton(label: AppStrings.cancel, onPressed: () => Navigator.pop(context, false), fill: false),
+          AppButton(label: AppStrings.delete, onPressed: () => Navigator.pop(context, true)),
         ],
       ),
     );
@@ -166,15 +160,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                     controller: emailController,
                     label: 'Email',
                     keyboardType: TextInputType.emailAddress,
-                    validator: (String? value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Email is required.';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Enter a valid email address.';
-                      }
-                      return null;
-                    },
+                    validator: emailValidator,
                   ),
                   SolidFormField(
                     controller: programmeController,
@@ -187,11 +173,9 @@ class _StudentsScreenState extends State<StudentsScreen> {
           ),
         ),
         actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
+          AppButton(label: AppStrings.cancel, onPressed: () => Navigator.pop(dialogContext), fill: false),
+          AppButton(
+            label: AppStrings.save,
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 final Student studentData = Student(
@@ -202,7 +186,6 @@ class _StudentsScreenState extends State<StudentsScreen> {
                   intake: intakeController.text.trim(),
                   status: 'Active',
                 );
-                // The screen collects the form input and forwards the action to the service layer.
                 if (student == null) {
                   _studentService.addStudent(studentData);
                 } else {
@@ -214,7 +197,6 @@ class _StudentsScreenState extends State<StudentsScreen> {
                 Navigator.pop(dialogContext);
               }
             },
-            child: const Text('Save'),
           ),
         ],
       ),

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../core/constants/app_colors.dart';
+import '../core/constants/app_sizes.dart';
+import '../core/theme/app_text_styles.dart';
+
 class SummaryCard extends StatelessWidget {
   const SummaryCard({
     super.key,
@@ -20,15 +24,15 @@ class SummaryCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(AppSizes.cardPadding),
         child: Row(
           children: <Widget>[
             CircleAvatar(
-              radius: 25,
-              backgroundColor: colors.primaryContainer,
+              radius: AppSizes.avatarRadius,
+              backgroundColor: AppColors.primaryContainer,
               child: Icon(icon, color: colors.onPrimaryContainer),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: AppSizes.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,12 +41,10 @@ class SummaryCard extends StatelessWidget {
                     title,
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSizes.xxs),
                   Text(
                     value,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context).textTheme.headlineSmall?.merge(AppTextStyles.summaryValue),
                   ),
                   if (subtitle != null) ...<Widget>[
                     const SizedBox(height: 2),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../core/constants/app_sizes.dart';
+import '../core/constants/app_strings.dart';
+import '../core/services/formatting_service.dart';
 import '../state/bci_store.dart';
 import '../widgets/summary_card.dart';
 
@@ -11,7 +14,7 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSizes.screenPadding),
       children: <Widget>[
         Text(
           'BCI Management Dashboard',
@@ -19,12 +22,12 @@ class DashboardScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSizes.xs),
         Text(
-          'Student administration and monthly payroll overview',
+          AppStrings.dashboardSubtitle,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSizes.lg),
         LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final int columns = constraints.maxWidth >= 900
@@ -51,7 +54,7 @@ class DashboardScreen extends StatelessWidget {
               ),
               SummaryCard(
                 title: 'Monthly Net Payroll',
-                value: _money(store.monthlyPayrollTotal),
+                value: FormattingService.formatMoney(store.monthlyPayrollTotal),
                 subtitle: 'Calculated from current employee records',
                 icon: Icons.payments_outlined,
               ),
@@ -108,7 +111,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  static String _money(double value) => 'LKR ${value.toStringAsFixed(2)}';
 }
 
 class _ModuleRow extends StatelessWidget {

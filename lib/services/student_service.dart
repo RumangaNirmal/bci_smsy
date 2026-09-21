@@ -1,7 +1,8 @@
+import '../core/services/search_service.dart';
 import '../models/student.dart';
 import '../state/bci_store.dart';
 
-/// This service contains the student-related business rules and separates them from the UI layer.
+/// For student management logic to the main function.
 abstract class StudentServiceContract {
   List<Student> getStudents();
   List<Student> searchStudents(String query);
@@ -20,15 +21,15 @@ class StudentService implements StudentServiceContract {
 
   @override
   List<Student> searchStudents(String query) {
-    final String normalizedQuery = query.trim().toLowerCase();
+    final String normalizedQuery = query.trim();
     if (normalizedQuery.isEmpty) {
       return getStudents();
     }
 
     return getStudents().where((Student student) {
-      return student.id.toLowerCase().contains(normalizedQuery) ||
-          student.name.toLowerCase().contains(normalizedQuery) ||
-          student.program.toLowerCase().contains(normalizedQuery);
+      return SearchService.matchesQuery(student.id, normalizedQuery) ||
+          SearchService.matchesQuery(student.name, normalizedQuery) ||
+          SearchService.matchesQuery(student.program, normalizedQuery);
     }).toList();
   }
 

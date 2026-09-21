@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../core/constants/app_strings.dart';
+import '../core/widgets/app_buttons.dart';
+import '../core/widgets/app_text_field.dart';
 import '../models/course.dart';
 import '../models/student.dart';
 import '../services/enrollment_service.dart';
@@ -26,7 +29,7 @@ class _EnrolmentsScreenState extends State<EnrolmentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // The enrollment screen depends on a service abstraction for student and course operations.
+    // For student and course enrollment data to the main function.
     final List<Student> students = _enrollmentService.getStudents().where((Student student) {
       final String search = _query.toLowerCase();
       return student.id.toLowerCase().contains(search) ||
@@ -43,19 +46,15 @@ class _EnrolmentsScreenState extends State<EnrolmentsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Student Enrolments',
+                  AppStrings.enrolmentManagement,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 14),
-                TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Search student',
-                    hintText: 'Search by student ID or name',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
-                  ),
+                SearchTextField(
+                  label: AppStrings.searchStudent,
+                  hintText: AppStrings.searchHintStudent,
                   onChanged: (String value) => setState(() => _query = value),
                 ),
               ],
@@ -63,7 +62,7 @@ class _EnrolmentsScreenState extends State<EnrolmentsScreen> {
           ),
           Expanded(
             child: students.isEmpty
-                ? const Center(child: Text('No students found.'))
+                ? const Center(child: Text(AppStrings.noStudentsFound))
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
                     itemCount: students.length,
@@ -139,16 +138,13 @@ class _EnrolmentsScreenState extends State<EnrolmentsScreen> {
               ),
             ),
             actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
+              AppButton(label: AppStrings.cancel, onPressed: () => Navigator.pop(dialogContext), fill: false),
+              AppButton(
+                label: AppStrings.save,
                 onPressed: () {
                   _enrollmentService.assignCourses(student.id, selectedCourseIds.toList());
                   Navigator.pop(dialogContext);
                 },
-                child: const Text('Save'),
               ),
             ],
           );

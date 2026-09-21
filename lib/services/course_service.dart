@@ -1,7 +1,8 @@
+import '../core/services/search_service.dart';
 import '../models/course.dart';
 import '../state/bci_store.dart';
 
-/// This service manages course-related business logic and keeps the user interface focused on presentation.
+/// For course management logic to the main function.
 abstract class CourseServiceContract {
   List<Course> getCourses();
   List<Course> searchCourses(String query);
@@ -20,15 +21,15 @@ class CourseService implements CourseServiceContract {
 
   @override
   List<Course> searchCourses(String query) {
-    final String normalizedQuery = query.trim().toLowerCase();
+    final String normalizedQuery = query.trim();
     if (normalizedQuery.isEmpty) {
       return getCourses();
     }
 
     return getCourses().where((Course course) {
-      return course.code.toLowerCase().contains(normalizedQuery) ||
-          course.name.toLowerCase().contains(normalizedQuery) ||
-          course.description.toLowerCase().contains(normalizedQuery);
+      return SearchService.matchesQuery(course.code, normalizedQuery) ||
+          SearchService.matchesQuery(course.name, normalizedQuery) ||
+          SearchService.matchesQuery(course.description, normalizedQuery);
     }).toList();
   }
 

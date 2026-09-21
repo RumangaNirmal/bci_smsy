@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../core/constants/app_strings.dart';
+import '../core/services/formatting_service.dart';
+import '../core/validators/validators.dart';
+import '../core/widgets/app_buttons.dart';
+import '../core/widgets/app_text_field.dart';
 import '../models/employee.dart';
 import '../state/bci_store.dart';
 
@@ -15,14 +20,14 @@ class PayrollScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
         children: <Widget>[
           Text(
-            'Payroll Management',
+            AppStrings.payrollManagement,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           const SizedBox(height: 6),
           Text(
-            'Monthly salary calculation for BCI employees',
+            AppStrings.payrollSubtitle,
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 18),
@@ -39,7 +44,7 @@ class PayrollScreen extends StatelessWidget {
                       children: <Widget>[
                         const Text('Total Net Payroll'),
                         Text(
-                          _money(store.monthlyPayrollTotal),
+                          FormattingService.formatMoney(store.monthlyPayrollTotal),
                           style: Theme.of(context)
                               .textTheme
                               .headlineSmall
@@ -87,10 +92,11 @@ class PayrollScreen extends StatelessWidget {
                     ),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: TextButton.icon(
+                      child: AppButton(
+                        label: 'Remove Employee',
+                        icon: Icons.delete_outline,
                         onPressed: () => _confirmDelete(context, employee),
-                        icon: const Icon(Icons.delete_outline),
-                        label: const Text('Remove Employee'),
+                        fill: false,
                       ),
                     ),
                   ],
@@ -100,10 +106,10 @@ class PayrollScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: PrimaryButton(
         onPressed: () => _showAddEmployeeDialog(context),
-        icon: const Icon(Icons.person_add_alt_1),
-        label: const Text('Add Employee'),
+        icon: Icons.person_add_alt_1,
+        label: AppStrings.addEmployee,
       ),
     );
   }
@@ -115,14 +121,8 @@ class PayrollScreen extends StatelessWidget {
         title: const Text('Remove employee'),
         content: Text('Remove ${employee.name} and the payroll record?'),
         actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Remove'),
-          ),
+          AppButton(label: AppStrings.cancel, onPressed: () => Navigator.pop(context, false), fill: false),
+          AppButton(label: AppStrings.remove, onPressed: () => Navigator.pop(context, true)),
         ],
       ),
     );
@@ -191,11 +191,9 @@ class PayrollScreen extends StatelessWidget {
           ),
         ),
         actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
+          AppButton(label: AppStrings.cancel, onPressed: () => Navigator.pop(dialogContext), fill: false),
+          AppButton(
+            label: 'Calculate and Save',
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 store.addEmployee(
@@ -214,7 +212,6 @@ class PayrollScreen extends StatelessWidget {
                 Navigator.pop(dialogContext);
               }
             },
-            child: const Text('Calculate and Save'),
           ),
         ],
       ),
@@ -235,7 +232,6 @@ class PayrollScreen extends StatelessWidget {
     }
   }
 
-  static String _money(double value) => 'LKR ${value.toStringAsFixed(2)}';
 }
 
 class _SalaryRow extends StatelessWidget {
@@ -262,7 +258,7 @@ class _SalaryRow extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Expanded(child: Text(label, style: style)),
-          Text('LKR ${value.toStringAsFixed(2)}', style: style),
+          Text(FormattingService.formatMoney(value), style: style),
         ],
       ),
     );
@@ -284,20 +280,18 @@ class _TextEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField(
+      child: AppTextField(
         controller: controller,
+        label: label,
         keyboardType: numeric
             ? const TextInputType.numberWithOptions(decimal: true)
             : TextInputType.text,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
         validator: (String? value) {
-          if (value == null || value.trim().isEmpty) {
-            return '$label is required.';
+          final String? requiredMessage = requiredValidator(value, fieldName: label);
+          if (requiredMessage != null) {
+            return requiredMessage;
           }
-          if (numeric && double.tryParse(value.trim()) == null) {
+          if (numeric && double.tryParse(value!.trim()) == null) {
             return 'Enter a valid numerical amount.';
           }
           return null;

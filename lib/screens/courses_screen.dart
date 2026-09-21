@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../core/constants/app_strings.dart';
+import '../core/validators/validators.dart';
+import '../core/widgets/app_buttons.dart';
+import '../core/widgets/app_text_field.dart';
 import '../models/course.dart';
 import '../services/course_service.dart';
 import '../state/bci_store.dart';
@@ -26,7 +30,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // The screen delegates course filtering to a dedicated service for better separation of concerns.
+    // For course filtering to the main function.
     final List<Course> courses = _courseService.searchCourses(_query);
 
     return Scaffold(
@@ -38,19 +42,15 @@ class _CoursesScreenState extends State<CoursesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Course Management',
+                  AppStrings.courseManagement,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 14),
-                TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Search courses',
-                    hintText: 'Search by code, name or description',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
-                  ),
+                SearchTextField(
+                  label: AppStrings.searchCourses,
+                  hintText: AppStrings.searchHintCourses,
                   onChanged: (String value) => setState(() => _query = value),
                 ),
               ],
@@ -58,7 +58,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
           ),
           Expanded(
             child: courses.isEmpty
-                ? const Center(child: Text('No courses found.'))
+                ? const Center(child: Text(AppStrings.noCoursesFound))
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
                     itemCount: courses.length,
@@ -104,10 +104,10 @@ class _CoursesScreenState extends State<CoursesScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: PrimaryButton(
         onPressed: () => _showAddEditCourseDialog(),
-        icon: const Icon(Icons.library_add_outlined),
-        label: const Text('Add Course'),
+        icon: Icons.library_add_outlined,
+        label: AppStrings.addCourse,
       ),
     );
   }
@@ -119,14 +119,8 @@ class _CoursesScreenState extends State<CoursesScreen> {
         title: const Text('Delete course'),
         content: Text('Delete ${course.name} from the system?'),
         actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
+          AppButton(label: AppStrings.cancel, onPressed: () => Navigator.pop(context, false), fill: false),
+          AppButton(label: AppStrings.delete, onPressed: () => Navigator.pop(context, true)),
         ],
       ),
     );
@@ -169,10 +163,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     label: 'Credits',
                     keyboardType: TextInputType.number,
                     validator: (String? value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Credits is required.';
+                      final String? requiredMessage = requiredValidator(value, fieldName: 'Credits');
+                      if (requiredMessage != null) {
+                        return requiredMessage;
                       }
-                      if (int.tryParse(value.trim()) == null) {
+                      if (int.tryParse(value!.trim()) == null) {
                         return 'Enter a valid number.';
                       }
                       return null;
@@ -186,11 +181,9 @@ class _CoursesScreenState extends State<CoursesScreen> {
           ),
         ),
         actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
+          AppButton(label: AppStrings.cancel, onPressed: () => Navigator.pop(dialogContext), fill: false),
+          AppButton(
+            label: AppStrings.save,
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 final Course updatedCourse = Course(
@@ -201,7 +194,6 @@ class _CoursesScreenState extends State<CoursesScreen> {
                   description: descriptionController.text.trim(),
                   status: statusController.text.trim().isEmpty ? 'Active' : statusController.text.trim(),
                 );
-                // The screen converts the entered values into a course object and passes them to the service layer.
                 if (course == null) {
                   _courseService.addCourse(updatedCourse);
                 } else {
@@ -213,7 +205,6 @@ class _CoursesScreenState extends State<CoursesScreen> {
                 Navigator.pop(dialogContext);
               }
             },
-            child: const Text('Save'),
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// For reusable form field behavior to the main function.
+import 'app_text_field.dart';
+
 class SolidFormField extends StatelessWidget {
   const SolidFormField({
     super.key,
@@ -8,26 +9,23 @@ class SolidFormField extends StatelessWidget {
     required this.label,
     this.keyboardType,
     this.validator,
+    this.hintText,
   });
 
   final TextEditingController controller;
   final String label;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
+  final String? hintText;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        validator: validator,
-      ),
+    return AppTextField(
+      controller: controller,
+      label: label,
+      hintText: hintText,
+      keyboardType: keyboardType,
+      validator: validator,
     );
   }
 }
